@@ -1,3 +1,4 @@
+import { request } from 'express';
 import multer from 'multer';
 
 const storage = multer.diskStorage({
@@ -25,4 +26,4 @@ const upload = multer({
     },
 });
 
-export const uploadMiddleware = upload.single('file');
+export const uploadMiddleware = upload.single('file')
