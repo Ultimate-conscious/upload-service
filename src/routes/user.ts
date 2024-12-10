@@ -2,6 +2,7 @@ import { Router } from "express";
 import { prisma } from "..";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { LoginSchema, SignupSchema } from "../utils/types";
 
 export const userRouter = Router();
 
@@ -15,8 +16,14 @@ userRouter.get('/', (req, res) => {
  * @body {email: string, password: string, name: string}
  */
 userRouter.post("/signup", async (req, res) => {
+
+    const {success} = SignupSchema.safeParse(req.body);
+
+    if(!success){
+        res.status(400).json({error: "Invalid input"});
+        return;
+    }
     const {email, password, name} = req.body;
-    //TODO: input validation
 
     const existinguser = await prisma.user.findUnique({
         where: {
@@ -52,8 +59,15 @@ userRouter.post("/signup", async (req, res) => {
  * @body {email: string, password: string}
  */
 userRouter.post("/login", async (req, res) => {
+
+    const { success } = LoginSchema.safeParse(req.body);
+
+    if(!success){
+        res.status(400).json({error: "Invalid input"});
+        return;
+    }
+
     const {email, password} = req.body;
-    //TODO: input validation
 
     const user = await prisma.user.findUnique({
         where: {

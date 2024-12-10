@@ -13,8 +13,10 @@ fileRouter.get('/', (req, res) => {
 });
 
 
-
-
+/**
+ * @description Upload a file
+ * @body file: File to be uploaded
+ */
 fileRouter.post("/upload",authMiddleware ,uploadMiddleware,async (req, res) => {
 
     const file = await prisma.file.create({
@@ -32,6 +34,10 @@ fileRouter.post("/upload",authMiddleware ,uploadMiddleware,async (req, res) => {
 
 });
 
+/**
+ * @description Download a file
+ * @param fileId: File ID
+ */
 fileRouter.get("/download/:fileId",authMiddleware ,async (req, res) => {
     const { fileId } = req.params;
     const file = await prisma.file.findUnique({
@@ -58,6 +64,10 @@ fileRouter.get("/download/:fileId",authMiddleware ,async (req, res) => {
 
 });
 
+/**
+ * @description Delete a file
+ * @param fileid: File ID
+ */
 fileRouter.delete("/delete/:fileid",authMiddleware ,async (req, res) => {
     const { fileid } = req.params;
     const file = await prisma.file.findUnique({
@@ -83,7 +93,10 @@ fileRouter.delete("/delete/:fileid",authMiddleware ,async (req, res) => {
     res.json({message: "File deleted successfully"});
 });
 
-
+/**
+ * @description List all files
+ * @returns List of files
+*/
 fileRouter.get("/list",authMiddleware ,async (req, res) => {
     const files = await prisma.file.findMany({
         where: {
