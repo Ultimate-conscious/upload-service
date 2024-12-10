@@ -12,9 +12,9 @@ function authMiddleware(req: Request, res: Response, next: NextFunction) {
             res.status(401).json({ error: "Unauthorized" });
             return;
         }
-
         const payload = verify(token, process.env.JWT_SECRET || "");
         //@ts-ignore
+        req.user = payload;
         next();
     } catch (error) {
         res.status(401).json({ error: "Unauthorized" });

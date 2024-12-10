@@ -8,10 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userRouter = void 0;
 const express_1 = require("express");
 const __1 = require("..");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 exports.userRouter = (0, express_1.Router)();
 exports.userRouter.get('/', (req, res) => {
     res.send("User Route check");
@@ -33,16 +38,19 @@ exports.userRouter.post("/signup", (req, res) => __awaiter(void 0, void 0, void 
         res.status(400).json({ error: "User already exists" });
         return;
     }
-    // TODO: hash the password
+    const hashedPassword = yield bcryptjs_1.default.hash(password, 10);
     const user = yield __1.prisma.user.create({
         data: {
             email,
-            password,
+            password: hashedPassword,
             name
         }
     });
-    //TODO: JWT token
-    res.status(201).json({ message: "User created successfully" });
+    const token = jsonwebtoken_1.default.sign({ id: user.id, email }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
+    res.status(201).json({
+        message: "User created successfully",
+        token
+    });
 }));
 /**
  * @description This route is used to login a user
@@ -61,10 +69,15 @@ exports.userRouter.post("/login", (req, res) => __awaiter(void 0, void 0, void 0
         res.status(400).json({ error: "User does not exist" });
         return;
     }
-    if (user.password !== password) {
-        res.status(400).json({ error: "Invalid password" });
-        return;
-    }
-    // TODO: JWT token
-    res.status(200).json({ message: "User logged in successfully" });
+    bcryptjs_1.default.compare(password, user.password, (err, result) => {
+        if (!result) {
+            res.status(400).json({ error: "Invalid password" });
+            return;
+        }
+    });
+    const token = jsonwebtoken_1.default.sign({ id: user.id, email }, process.env.JWT_SECRET || "", { expiresIn: "1d" });
+    res.status(200).json({
+        message: "User logged in successfully",
+        token
+    });
 }));

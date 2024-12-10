@@ -12,9 +12,8 @@ CREATE TABLE "User" (
 CREATE TABLE "File" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "key" TEXT NOT NULL,
-    "filetype" TEXT NOT NULL,
-    "filesize" INTEGER NOT NULL,
+    "mimetype" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
     "uploadedAt" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,
 

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { prisma } from "..";
-
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 export const userRouter = Router();
 
@@ -26,16 +27,22 @@ userRouter.post("/signup", async (req, res) => {
         res.status(400).json({error: "User already exists"});
         return;
     }
-    // TODO: hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
         data: {
             email,
-            password,
+            password: hashedPassword,
             name
         }
     })
-    //TODO: JWT token
-    res.status(201).json({message: "User created successfully"});
+
+    const token = jwt.sign({id:user.id ,email}, process.env.JWT_SECRET || "",{expiresIn: "1d"});
+
+    res.status(201).json({
+        message: "User created successfully",
+        token
+    });
 
 });
 
@@ -57,10 +64,18 @@ userRouter.post("/login", async (req, res) => {
         res.status(400).json({error: "User does not exist"});
         return;
     }
-    if(user.password !== password){
-        res.status(400).json({error: "Invalid password"});
-        return;
-    }
-    // TODO: JWT token
-    res.status(200).json({message: "User logged in successfully"});
+    bcrypt.compare(password, user.password, (err, result) => {
+        if(!result){
+            res.status(400).json({error: "Invalid password"});
+            return;
+        }
+    });
+
+    const token = jwt.sign({id:user.id ,email}, process.env.JWT_SECRET || "",{expiresIn: "1d"});
+
+    res.status(200).json({
+        message: "User logged in successfully",
+        token
+    });
+    
 });

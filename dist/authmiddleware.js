@@ -12,6 +12,7 @@ function authMiddleware(req, res, next) {
         }
         const payload = (0, jsonwebtoken_1.verify)(token, process.env.JWT_SECRET || "");
         //@ts-ignore
+        req.user = payload;
         next();
     }
     catch (error) {
